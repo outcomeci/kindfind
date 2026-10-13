@@ -3,7 +3,7 @@ name: OutcomeCI workflows
 # Release: https://github.com/outcomeci/workflow-sync-action/releases/tag/v1.0.1
 on:
   pull_request:
-    paths: ['.outcomeci/workflows/**', '.github/workflows/outcomeci.yml']
+    branches: [main]
   push:
     branches: [main]
     paths: ['.outcomeci/workflows/**', '.github/workflows/outcomeci.yml']

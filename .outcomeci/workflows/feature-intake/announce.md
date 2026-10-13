@@ -1,0 +1,1 @@
+Reply once in the original Slack thread. If create_issue returned created or existing, include its real issue URL and a short summary. If blocked, report its reason and say no new issue was confirmed. Never invent a URL or claim success after an uncertain write.

@@ -16,8 +16,8 @@ from outcomeci.workflow.compiler import compile_workflow
 from outcomeci.workflow.language import provider
 
 ROOT = Path(__file__).resolve().parents[1]
-INTAKE = ROOT / "workflows/feature-intake/outcome.yml"
-DISPATCHER = ROOT / "workflows/slack-dispatcher/outcome.yml"
+INTAKE = ROOT / ".outcomeci/workflows/feature-intake/workflow.yml"
+DISPATCHER = ROOT / ".outcomeci/workflows/slack-dispatcher/workflow.yml"
 
 
 @pytest.fixture

@@ -1,0 +1,1 @@
+Tell the requester that the issue draft was not approved, so no GitHub issue was created. Explain whether the review was rejected, timed out, or reached its conversation limit. Keep this to one short reply.

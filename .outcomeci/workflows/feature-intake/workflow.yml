@@ -1,0 +1,105 @@
+apiVersion: outcomeci.workflow/v1
+name: kindfind-feature-intake
+trigger: {type: dispatcher, dispatcher: slack-dispatcher}
+
+secrets:
+  slack: vault:slack/bot-token
+  github: vault:github/pat
+
+apis:
+  slack: {uses: slack, auth: secrets.slack}
+  github: {uses: github, auth: secrets.github}
+
+reasoning:
+  default: {runner: codex, model: gpt-5.5}
+  fallback: [{runner: claude, model: claude-opus-5-5}]
+
+steps:
+  - scope:
+      reason: scope.md
+      with: trigger
+      can:
+        - github.read: {repo: {owner: outcomeci, name: kindfind}}
+        - slack.post: {channel: trigger.channel, thread_ts: trigger.ts}
+      returns:
+        plan:
+          title: string
+          problem: string
+          users: [string]
+          scope: [string]
+          out_of_scope: [string]
+          acceptance: [string]
+          assumptions: [string]
+          questions: [string]
+
+  - clarify:
+      with: scope.plan
+      converse: slack.thread(scope.calls.slack.post)
+      by: trigger.user
+      until: converged
+      max_turns: 24
+      timeout: 2d
+      reason: clarify.md
+      returns: [plan, status, decision]
+
+  - scope_stopped:
+      when: clarify.decision != "approved"
+      reason: scope_stopped.md
+      with: clarify.status
+      can:
+        - slack.post: {channel: trigger.channel, thread_ts: trigger.ts}
+
+  - specification:
+      when: clarify.decision == "approved"
+      reason: specification.md
+      with: [trigger, clarify.plan]
+      can:
+        - github.read: {repo: {owner: outcomeci, name: kindfind}}
+        - slack.post: {channel: trigger.channel, thread_ts: trigger.ts}
+      returns:
+        plan: {title: string, body: string}
+
+  - review:
+      when: clarify.decision == "approved"
+      with: specification.plan
+      converse: slack.thread(specification.calls.slack.post)
+      by: trigger.user
+      until: converged
+      max_turns: 24
+      timeout: 2d
+      reason: review.md
+      returns: [plan, status, decision]
+
+  - review_stopped:
+      when: review.decision != "approved"
+      reason: review_stopped.md
+      with: review.status
+      can:
+        - slack.post: {channel: trigger.channel, thread_ts: trigger.ts}
+
+  - create_issue:
+      when: review.decision == "approved"
+      reason: create_issue.md
+      with: [trigger, review.plan]
+      can:
+        - github.write: {repo: {owner: outcomeci, name: kindfind}}
+      policy: >
+        Only GET requests within /repos/outcomeci/kindfind and at most one POST
+        to /repos/outcomeci/kindfind/issues are allowed. The POST title must
+        exactly equal review.plan.title and the body must exactly equal
+        review.plan.body followed by the specified hidden deduplication marker.
+        Do not create another issue if this intake already has one. No issue
+        edits, comments, labels, assignees, branches, commits, pull requests,
+        repository settings, or changes to any other repository.
+      returns:
+        status: enum[created, existing, blocked]
+        url?: string
+        number?: int
+        reason: string
+
+  - announce:
+      when: review.decision == "approved"
+      reason: announce.md
+      with: [review.plan, create_issue]
+      can:
+        - slack.post: {channel: trigger.channel, thread_ts: trigger.ts}

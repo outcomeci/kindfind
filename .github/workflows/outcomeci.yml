@@ -1,0 +1,40 @@
+name: OutcomeCI workflows
+# Public action: https://github.com/marketplace/actions/outcomeci-workflow-sync
+# Release: https://github.com/outcomeci/workflow-sync-action/releases/tag/v1.0.1
+on:
+  pull_request:
+    paths: ['.outcomeci/workflows/**', '.github/workflows/outcomeci.yml']
+  push:
+    branches: [main]
+    paths: ['.outcomeci/workflows/**', '.github/workflows/outcomeci.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: outcomeci-workflows-${{ github.repository_id }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: outcomeci/workflow-sync-action@v1.0.1
+  sync:
+    # Enable after the existing cloud workflows are reconciled/adopted and
+    # KindFind's Vault grants have been installed.
+    if: >-
+      github.event_name != 'pull_request' && github.ref == 'refs/heads/main' &&
+      vars.OUTCOMECI_SYNC_ENABLED == 'true'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: outcomeci/workflow-sync-action@v1.0.1
+        with:
+          mode: sync
+          workspace-id: ${{ vars.OUTCOMECI_WORKSPACE_ID }}
+          token: ${{ secrets.OUTCOMECI_TOKEN }}

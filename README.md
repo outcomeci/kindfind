@@ -25,8 +25,27 @@ The issue captures the specification and clarification stage of
 testable requirements, measurable outcomes, assumptions, and an implementation
 handoff. Technical planning, tasks, and implementation follow separately.
 
-Workflow source: [`workflows/feature-intake/outcome.yml`](workflows/feature-intake/outcome.yml).
-Dispatcher source: [`workflows/slack-dispatcher/outcome.yml`](workflows/slack-dispatcher/outcome.yml).
+Workflow source: [`.outcomeci/workflows/feature-intake/workflow.yml`](.outcomeci/workflows/feature-intake/workflow.yml).
+Dispatcher source: [`.outcomeci/workflows/slack-dispatcher/workflow.yml`](.outcomeci/workflows/slack-dispatcher/workflow.yml).
+
+Each workflow has its own folder under `.outcomeci/workflows/`. The intake's
+Markdown instructions sit beside its YAML definition, referenced by filename
+(for example, `reason: scope.md`). Decision-field instructions in the dispatcher
+remain inline because the workflow language expects text for those fields.
+
+Pull requests validate these committed bundles with the public
+[OutcomeCI Workflow Sync action](https://github.com/marketplace/actions/outcomeci-workflow-sync),
+using [v1.0.1](https://github.com/outcomeci/workflow-sync-action/releases/tag/v1.0.1)
+(`outcomeci/workflow-sync-action@v1.0.1`) for both validation and publishing.
+The publishing job is installed but gated by `OUTCOMECI_SYNC_ENABLED=true`.
+Before enabling it, configure `OUTCOMECI_WORKSPACE_ID` and the `OUTCOMECI_TOKEN`
+Actions secret, complete the Vault grants below, and reconcile ownership of
+the existing cloud workflows. The pre-existing inline intake and shared
+dispatcher are not silently overwritten: the action requires exact-match
+adoption before managing an existing workflow, and the new Markdown bundle
+differs from the original inline revision. See the action's adoption guidance.
+After setup, merges publish changed revisions automatically, with dispatch
+children published before their parent. Removed folders retain cloud workflows.
 
 ## Operator setup
 

@@ -41,7 +41,7 @@ steps:
             - {value: github_pr}
             - {value: research}
             - {value: none}
-  - kindfind_intake:
+  - feature_intake:
       when: classify.destination.choice == "kindfind_intake"
       dispatch: kindfind-feature-intake
       with: trigger

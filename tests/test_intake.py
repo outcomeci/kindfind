@@ -112,15 +112,17 @@ def test_github_grant_refuses_other_repositories(tmp_path, compiled):
 
 
 @pytest.mark.parametrize(
-    "decision,target",
+    "decision,step_name,target",
     [
-        ("kindfind_intake", "kindfind-feature-intake"),
-        ("github_pr", "slack-github-pr"),
-        ("research", "slack-research"),
-        ("none", None),
+        ("kindfind_intake", "feature_intake", "kindfind-feature-intake"),
+        ("github_pr", "github_pr", "slack-github-pr"),
+        ("research", "research", "slack-research"),
+        ("none", None, None),
     ],
 )
-def test_dispatcher_selects_one_child_and_preserves_payload(tmp_path, decision, target):
+def test_dispatcher_selects_one_child_and_preserves_payload(
+    tmp_path, decision, step_name, target
+):
     compile_workflow(DISPATCHER)
     document = yaml.safe_load(DISPATCHER.read_text())
     document["trigger"] = "manual"
@@ -170,6 +172,6 @@ def test_dispatcher_selects_one_child_and_preserves_payload(tmp_path, decision, 
     if target is None:
         assert not calls
     else:
-        assert calls == [{"step": decision, "input": payload}]
-        step = next(item[decision] for item in document["steps"] if decision in item)
+        assert calls == [{"step": step_name, "input": payload}]
+        step = next(item[step_name] for item in document["steps"] if step_name in item)
         assert step["dispatch"] == target

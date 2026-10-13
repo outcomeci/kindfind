@@ -33,8 +33,10 @@ Markdown instructions sit beside its YAML definition, referenced by filename
 (for example, `reason: scope.md`). Decision-field instructions in the dispatcher
 remain inline because the workflow language expects text for those fields.
 
-Pull requests validate these committed bundles with
-[`outcomeci/workflow-sync-action`](https://github.com/outcomeci/workflow-sync-action).
+Pull requests validate these committed bundles with the public
+[OutcomeCI Workflow Sync action](https://github.com/marketplace/actions/outcomeci-workflow-sync),
+using [v1.0.1](https://github.com/outcomeci/workflow-sync-action/releases/tag/v1.0.1)
+(`outcomeci/workflow-sync-action@v1.0.1`) for both validation and publishing.
 The publishing job is installed but gated by `OUTCOMECI_SYNC_ENABLED=true`.
 Before enabling it, configure `OUTCOMECI_WORKSPACE_ID` and the `OUTCOMECI_TOKEN`
 Actions secret, complete the Vault grants below, and reconcile ownership of

@@ -114,7 +114,7 @@ def test_github_grant_refuses_other_repositories(tmp_path, compiled):
 @pytest.mark.parametrize(
     "decision,step_name,target",
     [
-        ("kindfind_intake", "feature_intake", "kindfind-feature-intake"),
+        ("feature_intake", "feature_intake", "kindfind-feature-intake"),
         ("github_pr", "github_pr", "slack-github-pr"),
         ("research", "research", "slack-research"),
         ("none", None, None),
@@ -153,7 +153,7 @@ def test_dispatcher_selects_one_child_and_preserves_payload(
         "confidence": 1.0,
         "probabilities": [
             {"value": name, "probability": float(name == decision)}
-            for name in ["kindfind_intake", "github_pr", "research", "none"]
+            for name in ["feature_intake", "github_pr", "research", "none"]
         ],
     }
     result = container.execute(
